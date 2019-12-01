@@ -17,7 +17,7 @@ let run () =
   let lines = Util.read_all_lines "d1_input.txt"
               |> List.map ~f:int_of_string in 
   let p1 = List.map lines ~f:compute
-          |> List.fold ~init:0 ~f:(+) in
+           |> List.fold ~init:0 ~f:(+) in
   let p2 = List.map lines ~f:compute_p2
            |> List.fold ~init:0 ~f:(+) in
   Printf.printf "Part 1: %d\n" p1;
