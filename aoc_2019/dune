@@ -1,3 +1,4 @@
 (executable
  (name aoc_2019)
- (libraries core))
+ (libraries core)
+ (preprocess (pps ppx_deriving.show ppx_jane)))
