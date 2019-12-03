@@ -5,6 +5,7 @@ let main () =
   match (int_of_string d) with
     1 -> Day1.run ()
   | 2 -> Day2.run ()
+  | 3 -> Day3.run ()
   | _ -> invalid_arg "Unknown day"
 
 let () = main ()
