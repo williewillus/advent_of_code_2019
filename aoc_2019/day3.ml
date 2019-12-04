@@ -100,34 +100,38 @@ let one_one_intersect p1 m1 p2 m2 : Point.t option =
 
       if vert_good && crossed_over then Some {x = p2.x; y = p1.y} else None
 
-let one_all_intersect p1 m1 (m2s : move list) : Point.t list =
-  let f (acc, p2) m2 =
-    let next_p2 = do_move m2 p2 in
+let one_all_intersect p1 m1 (m2s : move list) : (int * Point.t) list =
+  let f (acc, dist2, p2) m2 =
+    let new_dist2 = dist2 + (snd m2) in
+    let new_p2 = do_move m2 p2 in
     match one_one_intersect p1 m1 p2 m2 with
-      Some intersection -> (intersection :: acc, next_p2)
-    | None -> (acc, next_p2)
+      Some intersection -> ((new_dist2, intersection) :: acc, new_dist2, new_p2)
+    | None -> (acc, new_dist2, new_p2)
   in
-  let (intersections, _) = List.fold m2s ~init:([], Point.origin) ~f in
+  let (intersections, _, _) = List.fold m2s ~init:([], 0, Point.origin) ~f in
   intersections
 
-let all_all_intersect (m1s : move list) (m2s : move list) : Point.t Hash_set.t =
-  let ret = Hash_set.create (module Point) () in
-  let f p1 m1 =
-    one_all_intersect p1 m1 m2s
-    |> List.iter ~f:(fun p -> Hash_set.add ret p);
-    (do_move m1 p1)
+let all_all_intersect (m1s : move list) (m2s : move list) : (int * int * Point.t) list =
+  let f (acc, dist1, p1) m1 =
+    let new_dist1 = dist1 + (snd m1) in
+    let step = one_all_intersect p1 m1 m2s
+               |> List.map ~f:(fun (dist2, p) -> (new_dist1, dist2, p)) in
+    (step @ acc, new_dist1, do_move m1 p1)
   in
-  let _ = List.fold m1s ~init:Point.origin ~f in
-  let () = Hash_set.remove ret Point.origin in
-  ret
+  let (intersections, _, _) = List.fold m1s ~init:([], 0, Point.origin) ~f in
+  intersections
      
 let run () =
   let wires = Util.read_all_lines "d3_input.txt"
               |> List.map ~f:parse_wire in
   let all = all_all_intersect (List.nth_exn wires 0) (List.nth_exn wires 1) in
-  let () = Printf.printf "%d intersections\n" (Hash_set.length all) in
-  let all_lst = Hash_set.to_list all
-              |> List.sort ~compare:(fun a b -> (Point.l1 a) - (Point.l1 b))
-  in
-  let () = Printf.printf "Closest: %s\n" (Point.show (List.hd_exn all_lst)) in
-  Printf.printf "Dist: %d\n" (Point.l1 (List.hd_exn all_lst));
+  let p1 = List.map all ~f:(fun (_, _, p) -> p)
+           |> List.sort ~compare:(fun a b -> (Point.l1 a) - (Point.l1 b))
+           |> List.remove_consecutive_duplicates ~equal:(=)
+           |> List.hd_exn in
+  let () = Printf.printf "Part 1: Closest %s with distance %d\n" (Point.show p1) (Point.l1 p1) in
+  let (dist1, dist2, _) = List.sort all
+                            ~compare:(fun (d1a, d2a, _) (d1b, d2b, _) -> (d1a + d2a) - (d1b + d2b))
+                          |> List.hd_exn in
+  let () = Printf.printf "Part 2: First intersection in %d steps\n" (dist1 + dist2) in
+  ()
