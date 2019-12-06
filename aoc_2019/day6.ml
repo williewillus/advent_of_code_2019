@@ -24,19 +24,18 @@ let common_ancestor path_a path_b =
   |> Option.value_exn ~message:"No common ancestor!"
 
 let run () =
-  let input = Util.read_all_lines "d6_input.txt"
-              |> List.map ~f:parse_pair in
-  let f acc (orbitee, orbiter) =
-    if Hashtbl.mem acc orbiter then
-      failwith (orbiter ^ " is orbiting two things?!")
-    else
-      let () = Hashtbl.set acc ~key:orbiter ~data:orbitee in
-      acc
-  in
-  let parents = List.fold input ~init:(Hashtbl.create (module String)) ~f in
+  let parents = Util.read_all_lines "d6_input.txt"
+              |> List.map ~f:parse_pair 
+              |> List.fold ~init:(Hashtbl.create (module String))
+                   ~f:(fun acc (orbitee, orbiter) ->
+                     if Hashtbl.mem acc orbiter then
+                       failwith (orbiter ^ " is orbiting two things?!")
+                     else
+                       let () = Hashtbl.set acc ~key:orbiter ~data:orbitee in
+                       acc
+                   ) in
   let p1 = Hashtbl.keys parents
-           |> List.map ~f:(fun k -> height parents k)
-           |> List.sum (module Int) ~f:ident in
+           |> List.sum (module Int) ~f:(fun k -> height parents k) in
   let () = Printf.printf "Part 1: %d\n" p1 in
   let ancestor = common_ancestor (path_to parents "YOU" "COM") (path_to parents "SAN" "COM") in
   let you_parent = Hashtbl.find_exn parents "YOU" in
