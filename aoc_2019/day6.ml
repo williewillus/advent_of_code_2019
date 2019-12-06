@@ -5,14 +5,16 @@ let parse_pair line =
   (List.nth_exn split 0, List.nth_exn split 1)
 
 let path_to parents src dest =
-  (* precondition: acc already contains cur *)
-  let rec _path acc cur =
-    match Hashtbl.find parents cur with
-    | Some parent when parent = dest -> parent::acc
-    | Some parent -> _path (parent::acc) parent
-    | None -> failwith "Should never get here"
-  in
-  List.rev (_path [src] src)
+  if src = dest then [src]
+  else
+    (* precondition: acc already contains cur *)
+    let rec _path acc cur =
+      match Hashtbl.find parents cur with
+      | Some parent when parent = dest -> parent::acc
+      | Some parent -> _path (parent::acc) parent
+      | None -> failwith "Should never get here"
+    in
+    List.rev (_path [src] src)
 
 let dist_to parents src dest = List.length (path_to parents src dest) - 1
 
