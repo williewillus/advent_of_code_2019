@@ -8,6 +8,7 @@ let main () =
   | 3 -> Day3.run ()
   | 4 -> Day4.run ()
   | 5 -> Day5.run ()
+  | 6 -> Day6.run ()
   | _ -> invalid_arg "Unknown day"
 
 let () = main ()
