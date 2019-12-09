@@ -7,8 +7,11 @@ module Dir = struct
     | Left
     | Right
 
-  let vert d = d = Up || d = Down
-  let horz d = d = Left || d = Right
+  let vert = function
+    | Up | Down -> true
+    | _ -> false
+
+  let horz d = not (vert d)
 
   let perpendicular a b =
     match [a; b] with
@@ -28,6 +31,8 @@ module Point = struct
   let origin = {x = 0; y = 0}
 
   let l1 p = abs p.x + abs p.y
+
+  let equal a b = a.x = b.x && a.y = b.y
 end
 
 module Result = struct
@@ -84,6 +89,7 @@ let one_one_intersect p1 m1 p2 m2 : Point.t option =
       (* check that m2 crossed over m1's x coord, i.e. the signed difference changed *)
       let old_sign = Int.sign (p2.x - p1.x) in
       let new_sign = Int.sign (p2_prime.x - p1.x) in
+      let open Base__.Sign0.Replace_polymorphic_compare in
       let crossed_over = old_sign <> new_sign in
 
       if vert_good && crossed_over then Some {x = p1.x; y = p2.y} else None
@@ -96,6 +102,7 @@ let one_one_intersect p1 m1 p2 m2 : Point.t option =
       (* check that m1 crossed over m2's x coord, i.e. the signed difference changed *)
       let old_sign = Int.sign (p1.x - p2.x) in
       let new_sign = Int.sign (p1_prime.x - p2.x) in
+      let open Base__.Sign0.Replace_polymorphic_compare in
       let crossed_over = old_sign <> new_sign in
 
       if vert_good && crossed_over then Some {x = p2.x; y = p1.y} else None
@@ -127,7 +134,7 @@ let run () =
   let all = all_all_intersect (List.nth_exn wires 0) (List.nth_exn wires 1) in
   let p1 = List.map all ~f:(fun (_, _, p) -> p)
            |> List.sort ~compare:(fun a b -> (Point.l1 a) - (Point.l1 b))
-           |> List.remove_consecutive_duplicates ~equal:(=)
+           |> List.remove_consecutive_duplicates ~equal:Point.equal
            |> List.hd_exn in
   let () = Printf.printf "Part 1: Closest %s with distance %d\n" (Point.show p1) (Point.l1 p1) in
   let (dist1, dist2, _) = List.sort all

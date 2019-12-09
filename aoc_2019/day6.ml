@@ -7,7 +7,7 @@ let parse_pair line =
 let path_to parents src dest =
   (* precondition: acc already contains cur *)
   let rec _path acc cur =
-    if cur = dest then acc else
+    if String.equal cur dest then acc else
       match Hashtbl.find parents cur with
       | Some parent -> _path (parent::acc) parent
       | None -> failwith "Should never get here"
