@@ -23,6 +23,7 @@ module State = struct
       relbase = ref 0;
     }
 
+  (* Note: i is 1-indexed *)
   let resolve_param state i =
     let insn = get state !(state.pc) in
     let param = get state (!(state.pc) + i) in
@@ -34,7 +35,6 @@ module State = struct
     | 2 -> !(state.relbase) + param
     | _ -> invalid_arg "Unknown parameter mode"
 
-  (* Note: i is 1-indexed *)
   let read_param state i =
     let insn = get state (!(state.pc)) in
     let param = get state (!(state.pc) + i) in
