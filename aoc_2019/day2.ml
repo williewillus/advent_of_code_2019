@@ -1,35 +1,14 @@
 open Core
 
-let dispatch arr pc =
-  match Array.get arr pc with
-    1 -> begin
-      let l = Array.get arr (Array.get arr (pc + 1)) in 
-      let r = Array.get arr (Array.get arr (pc + 2)) in 
-      let dest = Array.get arr (pc + 3) in
-      Array.set arr dest (l + r);
-      false
-    end
-  | 2 -> begin
-      let l = Array.get arr (Array.get arr (pc + 1)) in 
-      let r = Array.get arr (Array.get arr (pc + 2)) in 
-      let dest = Array.get arr (pc + 3) in
-      Array.set arr dest (l * r);
-      false
-    end
-  | 99 -> true
-  | _ as i -> invalid_arg ("Unknown opcode" ^ (string_of_int i))
-
 let simulate data in1 in2 =
-  let data = Array.of_list data in
-  Array.set data 1 in1;
-  Array.set data 2 in2;
-  let pc = ref 0 in
+  let state = Intcode.State.init data in
+  let () = Intcode.State.set state 1 in1 in
+  let () = Intcode.State.set state 2 in2 in
   let exit = ref false in
   while not !exit do
-    exit := dispatch data !pc;
-    pc := !pc + 4;
+    exit := Intcode.State.dispatch state
   done;
-  Array.get data 0
+  Intcode.State.get state 0
 
 let run () =
   let input = Util.read_lines_to_string "d2_input.txt" in
