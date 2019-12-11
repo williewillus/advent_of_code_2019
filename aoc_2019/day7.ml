@@ -4,13 +4,15 @@ let num_machines = 5
 
 module State = struct
   type t = {
+      id : int;
       mem : int Array.t;
       pc : int ref;
       input : int Lwt_mvar.t;
       output : int Lwt_mvar.t;
     }
 
-  let init init_mem first_input = {
+  let init id init_mem first_input = {
+      id;
       mem = Array.of_list init_mem;
       pc = ref 0;
       input = Lwt_mvar.create first_input;
@@ -119,9 +121,9 @@ let inf_supplier v out_mbox =
   in
   do_transfer ()
 
-let run_trial mem init_inputs =
+let run_trial_p1 mem init_inputs =
   let machines = Sequence.range 0 num_machines
-                 |> Sequence.map ~f:(fun i -> State.init mem (List.nth_exn init_inputs i))
+                 |> Sequence.map ~f:(fun i -> State.init i mem (List.nth_exn init_inputs i))
                  |> Sequence.to_array in
 
   (* Launch a coroutine for each machine *)
@@ -138,6 +140,55 @@ let run_trial mem init_inputs =
   (* Drive scheduler until we get output of last abstract machine *)
   Lwt_main.run (Lwt_mvar.take machines.(num_machines - 1).State.output)
 
+let run_trial_p2 mem init_inputs =
+  let machines = Sequence.range 0 num_machines
+                 |> Sequence.map ~f:(fun i -> State.init i mem (List.nth_exn init_inputs i))
+                 |> Sequence.to_array in
+
+  (* Launch a coroutine for each machine except the last *)
+  let () = Array.slice machines 0 (num_machines - 1)
+           |> Array.iter ~f:(fun m -> Lwt.async (fun () -> State.run_to_end m)) in
+
+  (* Launch a coroutine piping between all the other machines *)
+  let () = Sequence.range 0 (num_machines - 1)
+           |> Sequence.map ~f:(fun i -> pipe machines.(i).output machines.(i+1).input)
+           |> Sequence.iter ~f:(fun prom -> Lwt.async (fun () -> prom)) in
+
+  (* Promise resolving when last machine terminates/the run is complete *)
+  let last_machine_prom = State.run_to_end machines.(num_machines - 1) in
+  let () = Lwt.async (fun () -> last_machine_prom) in
+
+  let top_level =
+    (* Initial zero to first machine *)
+    let%lwt () = Lwt_mvar.put machines.(0).State.input 0 in
+
+    (* Repeatedly pipe outputs from last machine to first until the machine terminates
+       But hold onto the values for the results *)
+    let rec _loop (acc : int list) =
+      match Lwt.state last_machine_prom with
+      | Lwt.Sleep ->
+         let%lwt v = Lwt_mvar.take machines.(num_machines - 1).State.output in
+         let%lwt () = Lwt_mvar.put machines.(0).State.input v in
+         (_loop (v::acc))
+      | _ ->
+         (* HACK! If last machine puts uncontended then immediately terminates this coroutine can
+            "miss" the final value. Ideally we would loop until the "channel is closed" instead
+            of polling the last machine coroutine's state, but mvar does not present such a
+            "channel closed" abstraction.
+          *)
+         match Lwt_mvar.take_available machines.(num_machines - 1).State.output with
+         | Some v -> Lwt.return (v::acc)
+         | None -> Lwt.return acc
+    in
+    
+    let%lwt outputs = _loop [] in
+    Lwt.return (List.max_elt ~compare:Int.compare outputs |> Option.value_exn)
+  in
+    
+  (* Drive scheduler until top_level resolves *)
+  Lwt_main.run top_level
+
+
 let bigarr_to_list arr = List.init (Bigarray.Array1.dim arr) ~f:(fun i -> arr.{i})
                          |> List.rev
 
@@ -145,11 +196,18 @@ let run () =
   let input = Util.read_lines_to_string "d7_input.txt" in
   let data = String.split input ~on:','
              |> List.map ~f:int_of_string in
+
   (* Building this way because it looks like Permutation.to_list is busted *)
-  let permutations = Combinat.Permutation.fold (Array.init num_machines ~f:ident)
+  let p1_permutations = Combinat.Permutation.fold (Array.init num_machines ~f:ident)
     ~init:[] ~f:(fun acc new_perm -> (bigarr_to_list new_perm)::acc) in
-  let p1 = List.map permutations ~f:(fun perm -> run_trial data perm)
+  let p1 = List.map p1_permutations ~f:(fun perm -> run_trial_p1 data perm)
            |> List.max_elt ~compare:Int.compare
            |> Option.value_exn in
   Printf.printf "Part 1: %d\n" p1;
 
+  let p2_permutations = Combinat.Permutation.fold (Array.init num_machines ~f:(fun i -> i + 5))
+    ~init:[] ~f:(fun acc new_perm -> (bigarr_to_list new_perm)::acc) in
+  let p2 = List.map p2_permutations ~f:(fun perm -> run_trial_p2 data perm)
+           |> List.max_elt ~compare:Int.compare
+           |> Option.value_exn in
+  Printf.printf "Part 2: %d\n" p2;

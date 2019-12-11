@@ -14,6 +14,7 @@ let main () =
     | 7 -> Day7.run ()
     | 8 -> Day8.run ()
     | 9 -> Day9.run ()
+    | 11 -> Day11.run ()
     | _ -> invalid_arg "Unknown day"
   in
   let end_time = Time_ns.now () in
