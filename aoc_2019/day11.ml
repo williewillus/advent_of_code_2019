@@ -2,11 +2,6 @@ open Core
 module Dir = Util.Dir
 module Point = Util.Point           
 
-type color =
-  | White
-  | Black
-  | Uncolored
-
 (* Dirty and imperative, but whatever *)
 module RobotState = struct
   type want_state =
