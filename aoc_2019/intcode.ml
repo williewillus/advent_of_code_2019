@@ -118,3 +118,4 @@ module State = struct
     | 99 -> true
     | _ as i -> invalid_arg ("Unknown opcode" ^ (string_of_int i))
 end
+

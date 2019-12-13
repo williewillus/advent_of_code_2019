@@ -1,39 +1,6 @@
 open Core
-
-module Dir = struct
-  type t =
-    | Up
-    | Down
-    | Left
-    | Right
-
-  let vert = function
-    | Up | Down -> true
-    | _ -> false
-
-  let horz d = not (vert d)
-
-  let perpendicular a b =
-    match [a; b] with
-    | [Up; Down] -> false
-    | [Down; Up] -> false
-    | [Left; Right] -> false
-    | [Right; Left] -> false
-    | _ -> true
-end
-  
-module Point = struct
-  type t = {
-      x : int;
-      y : int;
-    }
-             [@@deriving compare, sexp_of, hash, show]
-  let origin = {x = 0; y = 0}
-
-  let l1 p = abs p.x + abs p.y
-
-  let equal a b = a.x = b.x && a.y = b.y
-end
+module Dir = Util.Dir
+module Point = Util.Point         
 
 module Result = struct
   type t = (Point.t * int)
