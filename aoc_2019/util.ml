@@ -13,6 +13,35 @@ module Point = struct
   let equal a b = a.x = b.x && a.y = b.y
 end
 
+module Vec3 = struct
+  type t =
+    {
+      x : int;
+      y : int;
+      z : int;
+    }
+  [@@deriving compare, sexp_of, hash, show]
+
+  let origin = {x = 0; y = 0; z = 0}
+
+  let l1 p = abs p.x + abs p.y + abs p.z
+
+  let add a b = {x = a.x + b.x; y = a.y + b.y; z = a.z + b.z}
+
+  let neg p = {x = -p.x; y = -p.y; z = -p.z}
+
+  let equal a b = a.x = b.x && a.y = b.y && a.z = b.z
+
+  let parse s =
+    let rex = Re.Perl.compile_pat "<x=(.+), y=(.+), z=(.+)>" in
+    let grp = Re.exec rex s in
+    let matches = [1; 2; 3]
+                  |> List.map ~f:(Re.Group.get grp)
+                  |> List.map ~f:int_of_string in
+    {x = List.nth_exn matches 0; y = List.nth_exn matches 1; z = List.nth_exn matches 2}
+      
+end
+
 module Dir = struct
   type t =
     | Up
