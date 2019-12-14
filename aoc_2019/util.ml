@@ -11,6 +11,10 @@ module Point = struct
   let l1 p = abs p.x + abs p.y
 
   let equal a b = a.x = b.x && a.y = b.y
+
+  let l2_int {x = x1; y = y1} {x = x2; y = y2} =
+    let sq = (Int.pow (x2 - x1) 2) + (Int.pow (y2 - y1) 2) in
+    int_of_float (Float.sqrt (float_of_int sq))
 end
 
 module Vec3 = struct
@@ -75,12 +79,12 @@ module Dir = struct
     | Down -> Right
     | Left -> Down
 
-  let move p t =
+  let move ?(amt=1) p t =
     match t with
-    | Up -> {p with Point.y = p.Point.y + 1}
-    | Down -> {p with Point.y = p.Point.y - 1}
-    | Left -> {p with Point.x = p.Point.x - 1}
-    | Right -> {p with Point.x = p.Point.x + 1}
+    | Up -> {p with Point.y = p.Point.y + amt}
+    | Down -> {p with Point.y = p.Point.y - amt}
+    | Left -> {p with Point.x = p.Point.x - amt}
+    | Right -> {p with Point.x = p.Point.x + amt}
 end
 
 let read_all_lines name =
