@@ -1,4 +1,4 @@
 (executable
  (name aoc_2019)
- (libraries core lwt lwt.unix combinat re)
+ (libraries core lwt lwt.unix combinat re str)
  (preprocess (pps ppx_deriving.show ppx_jane lwt_ppx)))

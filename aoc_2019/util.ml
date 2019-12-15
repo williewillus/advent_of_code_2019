@@ -12,9 +12,11 @@ module Point = struct
 
   let equal a b = a.x = b.x && a.y = b.y
 
-  let l2_int {x = x1; y = y1} {x = x2; y = y2} =
+  let l2 {x = x1; y = y1} {x = x2; y = y2} =
     let sq = (Int.pow (x2 - x1) 2) + (Int.pow (y2 - y1) 2) in
-    int_of_float (Float.sqrt (float_of_int sq))
+    Float.sqrt (float_of_int sq)
+
+  let l2_int a b = int_of_float (l2 a b)
 end
 
 module Vec3 = struct
