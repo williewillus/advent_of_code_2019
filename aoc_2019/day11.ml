@@ -66,10 +66,7 @@ let simulate data p2 =
   let inh = RobotState.input_handler robot_state in
   let ouh = RobotState.output_handler robot_state in
   let state = Intcode.State.init ~input_handler:inh ~output_handler:ouh data in
-  let exit = ref false in
-  while not !exit do
-    exit := Intcode.State.dispatch state
-  done;
+  let () = Intcode.State.dispatch_all state in
   robot_state
 
 let run () =

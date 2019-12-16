@@ -4,10 +4,7 @@ let simulate data in1 in2 =
   let state = Intcode.State.init data in
   let () = Intcode.State.set state 1 in1 in
   let () = Intcode.State.set state 2 in2 in
-  let exit = ref false in
-  while not !exit do
-    exit := Intcode.State.dispatch state
-  done;
+  let () = Intcode.State.dispatch_all state in
   Intcode.State.get state 0
 
 let run () =

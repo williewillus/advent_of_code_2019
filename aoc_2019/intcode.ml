@@ -117,5 +117,13 @@ module State = struct
        false
     | 99 -> true
     | _ as i -> invalid_arg ("Unknown opcode" ^ (string_of_int i))
+
+  let dispatch_until state f =
+    let exit = ref false in
+    while not !exit do
+      exit := dispatch state || f ();
+    done
+
+  let dispatch_all state = dispatch_until state (fun () -> false)
 end
 
