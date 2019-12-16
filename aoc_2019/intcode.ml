@@ -118,12 +118,21 @@ module State = struct
     | 99 -> true
     | _ as i -> invalid_arg ("Unknown opcode" ^ (string_of_int i))
 
-  let dispatch_until state f =
-    let exit = ref false in
-    while not !exit do
-      exit := dispatch state || f ();
-    done
+  type dispatch_result =
+    | Terminated
+    | ConditionMet
 
-  let dispatch_all state = dispatch_until state (fun () -> false)
+  let dispatch_until state f =
+    let term = ref false in
+    let cond = ref false in
+    while not (!term || !cond) do
+      term := dispatch state;
+      cond := f ();
+    done;
+    if !term then Terminated else ConditionMet
+
+  let dispatch_all state =
+    let _ : dispatch_result = (dispatch_until state (fun () -> false)) in
+    ()
 end
 
