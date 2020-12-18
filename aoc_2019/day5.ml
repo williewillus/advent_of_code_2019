@@ -1,9 +1,7 @@
-open Core
-
 let run () =
   let input = Util.read_lines_to_string "d5_input.txt" in
-  let data = String.split input ~on:','
-             |> List.map ~f:int_of_string in
+  let data = String.split_on_char ',' input
+             |> List.map int_of_string in
   let () = print_string "For part 1, input '1'; for part 2, input '5';\n" in
   let state = Intcode.State.init data in
   Intcode.State.dispatch_all state
