@@ -1,5 +1,3 @@
-open Core
-
 let simulate data in1 in2 =
   let state = Intcode.State.init data in
   let () = Intcode.State.set state 1 in1 in
@@ -9,8 +7,8 @@ let simulate data in1 in2 =
 
 let run () =
   let input = Util.read_lines_to_string "d2_input.txt" in
-  let data = String.split input ~on:','
-             |> List.map ~f:int_of_string in
+  let data = String.split_on_char ',' input
+             |> List.map int_of_string in
   let p1 = simulate data 12 2 in
   Printf.printf "Part 1: %d\n" p1;
 
