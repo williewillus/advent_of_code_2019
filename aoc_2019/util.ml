@@ -1,6 +1,7 @@
-open Core
+let ipow base exp = int_of_float (Float.pow (float_of_int base) (float_of_int exp))
 
 module Point = struct
+  open Core
   type t = {
       x : int;
       y : int;
@@ -13,13 +14,14 @@ module Point = struct
   let equal a b = a.x = b.x && a.y = b.y
 
   let l2 {x = x1; y = y1} {x = x2; y = y2} =
-    let sq = (Int.pow (x2 - x1) 2) + (Int.pow (y2 - y1) 2) in
+    let sq = (ipow (x2 - x1) 2) + (ipow (y2 - y1) 2) in
     Float.sqrt (float_of_int sq)
 
   let l2_int a b = int_of_float (l2 a b)
 end
 
 module Vec3 = struct
+  open Core
   type t =
     {
       x : int;
@@ -90,12 +92,16 @@ module Dir = struct
 end
 
 let read_all_lines name =
-  let f = In_channel.create name in
-  protect
-    ~f:(fun () -> In_channel.input_lines f)
-    ~finally:(fun () -> In_channel.close f)
+  let f = open_in name in
+  let rec read_all acc =
+    try read_all ((input_line f)::acc)
+    with End_of_file -> List.rev acc
+  in
+  Fun.protect
+    ~finally:(fun () -> close_in f)
+    (fun () -> read_all [])
 
 let read_lines_to_string name =
   let lst = read_all_lines name in
-  String.concat ~sep:"\n" lst
+  String.concat "\n" lst
     
