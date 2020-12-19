@@ -1,8 +1,8 @@
-open Core
+module List = Base.List
 
 let digits i =
   let rec _digits acc i =
-    if i = 0 then acc else _digits ((i % 10)::acc) (i / 10)
+    if i = 0 then acc else _digits ((i mod 10)::acc) (i / 10)
   in
   _digits [] i
 
@@ -20,8 +20,8 @@ let valid_p2 i =
   order_good && groups_good
 
 let run () =
-  let seq = Sequence.range ~start:`inclusive ~stop:`inclusive 178416 676461 in
-  let p1 = Sequence.count seq ~f:valid_p1 in
-  let p2 = Sequence.count seq ~f:valid_p2 in
+  let seq = Util.range 178416 676461 in
+  let p1 = Seq.filter valid_p1 seq |> Util.count_seq in
+  let p2 = Seq.filter valid_p2 seq |> Util.count_seq in
   Printf.printf "Part 1: %d\n" p1;
   Printf.printf "Part 2: %d\n" p2;

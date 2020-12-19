@@ -1,4 +1,5 @@
-open Core
+module List = Base.List
+module Sequence = Base.Sequence
 
 let width = 25
 let height = 6
@@ -32,18 +33,18 @@ let repr v =
 let show layer =
   List.chunks_of layer ~length:width
   |> List.iter ~f:(fun row ->
-         List.map row ~f:repr
-         |> String.concat
+         List.map row ~f:(repr)
+         |> String.concat ""
          |> Printf.printf "%s\n")
 
 let run () =
-  let layers = String.concat (Util.read_all_lines "d8_input.txt")
-               |> String.to_list
-               |> List.map ~f:Char.get_digit_exn 
+  let layers = String.concat "" (Util.read_all_lines "d8_input.txt")
+               |> Base.String.to_list
+               |> List.map ~f:Base.Char.get_digit_exn 
                |> List.chunks_of ~length:layer_size in
   let min_zero_layer = List.min_elt layers
                          ~compare:(fun l1 l2 -> Int.compare (count_value 0 l1) (count_value 0 l2)) 
-                       |> Option.value_exn in
+                       |> Option.get in
   let p1 = (count_value 1 min_zero_layer) * (count_value 2 min_zero_layer) in
   let () = Printf.printf "Part 1: %d\n" p1 in
   let () = Printf.printf "Part 2:\n" in

@@ -1,5 +1,16 @@
 let ipow base exp = int_of_float (Float.pow (float_of_int base) (float_of_int exp))
 
+let range start stop =
+  let f v =
+    if v > stop then
+      None
+    else
+      Some (v, v + 1)
+  in
+  Seq.unfold f start
+
+let count_seq s = Seq.fold_left (fun acc _ -> acc + 1) 0 s
+
 module Point = struct
   open Core
   type t = {
