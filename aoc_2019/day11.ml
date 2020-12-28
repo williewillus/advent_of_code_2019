@@ -1,5 +1,5 @@
-open Core
 module Dir = Util.Dir
+module Hashtbl = Base.Hashtbl
 module Point = Util.Point           
 
 (* Dirty and imperative, but whatever *)
@@ -71,8 +71,8 @@ let simulate data p2 =
 
 let run () =
   let input = Util.read_lines_to_string "d11_input.txt" in
-  let data = String.split input ~on:','
-             |> List.map ~f:int_of_string in
+  let data = String.split_on_char ',' input
+             |> List.map int_of_string in
   let p1 = simulate data false in
   let () = Printf.printf "Part 1: %d\n" !(p1.painted) in
   let p2 = simulate data true in

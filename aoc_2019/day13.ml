@@ -1,4 +1,5 @@
-open Core
+module Hashtbl = Base.Hashtbl
+module Linked_queue = Base.Linked_queue
 module Point = Util.Point
 
 module Context = struct
@@ -59,8 +60,8 @@ end
 
 let run () =
   let input = Util.read_lines_to_string "d13_input.txt" in
-  let data = String.split input ~on:','
-             |> List.map ~f:int_of_string in
+  let data = String.split_on_char ',' input
+             |> List.map int_of_string in
   let ctx = Context.run_to_complete (Context.init data) in
-  let p1 = Hashtbl.count ctx.board ~f:(fun v -> let open Poly in v = Block) in
+  let p1 = Hashtbl.count ctx.board ~f:(fun v -> v = Block) in
   Printf.printf "Part 1: %d\n" p1

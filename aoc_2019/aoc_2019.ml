@@ -1,8 +1,6 @@
-open Core
-
 let main () =
-  let d = (Sys.get_argv ()).(1) in
-  let start_time = Time_ns.now () in
+  let d = Sys.argv.(1) in
+  let start_time = Unix.gettimeofday () in
   let () =
     match (int_of_string d) with
     | 1 -> Day1.run ()
@@ -21,7 +19,7 @@ let main () =
     | 16 -> Day16.run ()
     | _ -> invalid_arg "Unknown day"
   in
-  let end_time = Time_ns.now () in
-  Printf.printf "Completed in %d ms\n" (Time_ns.Span.to_int_ms (Time_ns.diff end_time start_time);)
+  let end_time = Unix.gettimeofday () in
+  Printf.printf "Completed in %f s\n" (end_time -. start_time)
 
 let () = main ()

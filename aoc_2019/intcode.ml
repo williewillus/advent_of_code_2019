@@ -1,4 +1,4 @@
-open Core
+module Hashtbl = Base.Hashtbl
 
 module State = struct
   type t =
@@ -13,8 +13,8 @@ module State = struct
   let stdio_output_handler v = Printf.printf "%d\n" v
 
   let stdio_input_handler () : int =
-    let () = Out_channel.flush Out_channel.stdout in
-    int_of_string (In_channel.input_line_exn In_channel.stdin)
+    let () = flush stdout in
+    int_of_string (read_line ())
 
   let get state addr =
     Hashtbl.find state.mem addr |> Option.value ~default:0
@@ -23,8 +23,8 @@ module State = struct
     Hashtbl.set state.mem ~key:addr ~data:v
 
   let init ?(output_handler=stdio_output_handler) ?(input_handler=stdio_input_handler) image =
-    let mem = Hashtbl.create (module Int) in
-    let () = List.iteri image ~f:(fun addr v -> Hashtbl.set mem ~key:addr ~data:v) in
+    let mem = Hashtbl.create (module Base.Int) in
+    let () = List.iteri (fun addr v -> Hashtbl.set mem ~key:addr ~data:v) image in
     {
       mem;
       pc = ref 0;
@@ -37,8 +37,8 @@ module State = struct
   let resolve_param state i =
     let insn = get state !(state.pc) in
     let param = get state (!(state.pc) + i) in
-    let div = Int.pow 10 (i + 1) in
-    let param_mode = (insn / div) % 10 in
+    let div = Base.Int.pow 10 (i + 1) in
+    let param_mode = (insn / div) mod 10 in
     match param_mode with
     | 0 -> param 
     | 1 -> invalid_arg "Cannot write to an immediate"
@@ -48,8 +48,8 @@ module State = struct
   let read_param state i =
     let insn = get state (!(state.pc)) in
     let param = get state (!(state.pc) + i) in
-    let div = Int.pow 10 (i + 1) in
-    let param_mode = (insn / div) % 10 in
+    let div = Base.Int.pow 10 (i + 1) in
+    let param_mode = (insn / div) mod 10 in
     match param_mode with
     | 0 -> get state param
     | 1 -> param
@@ -57,7 +57,7 @@ module State = struct
     | _ -> invalid_arg "Unknown parameter mode"
 
   let dispatch state =
-    match (get state !(state.pc) % 100) with
+    match (get state !(state.pc) mod 100) with
     | 1 -> begin
         let l = read_param state 1 in 
         let r = read_param state 2 in 

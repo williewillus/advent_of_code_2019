@@ -12,7 +12,7 @@ let range start stop =
 let count_seq s = Seq.fold_left (fun acc _ -> acc + 1) 0 s
 
 module Point = struct
-  open Core
+  open Base
   type t = {
       x : int;
       y : int;
@@ -26,13 +26,13 @@ module Point = struct
 
   let l2 {x = x1; y = y1} {x = x2; y = y2} =
     let sq = (ipow (x2 - x1) 2) + (ipow (y2 - y1) 2) in
-    Float.sqrt (float_of_int sq)
+    Float.sqrt (Float.of_int sq)
 
-  let l2_int a b = int_of_float (l2 a b)
+  let l2_int a b = Int.of_float (l2 a b)
 end
 
 module Vec3 = struct
-  open Core
+  open Base
   type t =
     {
       x : int;
@@ -56,7 +56,7 @@ module Vec3 = struct
     let grp = Re.exec rex s in
     let matches = [1; 2; 3]
                   |> List.map ~f:(Re.Group.get grp)
-                  |> List.map ~f:int_of_string in
+                  |> List.map ~f:Int.of_string in
     {x = List.nth_exn matches 0; y = List.nth_exn matches 1; z = List.nth_exn matches 2}
       
 end
