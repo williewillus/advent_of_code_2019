@@ -1,4 +1,6 @@
-open Core
+module Array = Core_kernel.Array
+module List = Base.List
+module Sequence = Base.Sequence
 
 let num_machines = 5
 
@@ -22,8 +24,8 @@ module State = struct
   (* Note: i is 1-indexed *)
   let read_param state i =
     let insn = state.mem.(!(state.pc)) in
-    let div = Int.pow 10 (i + 1) in
-    let param_mode = (insn / div) % 10 in
+    let div = Base.Int.pow 10 (i + 1) in
+    let param_mode = (insn / div) mod 10 in
     match param_mode with
     | 0 -> state.mem.(state.mem.(!(state.pc) + i))
     | 1 -> state.mem.(!(state.pc) + i)
@@ -31,7 +33,7 @@ module State = struct
 
   (* Promise that resolves after one cpu iteration is complete *)
   let dispatch state : bool Lwt.t =
-    match (state.mem.(!(state.pc)) % 100) with
+    match (state.mem.(!(state.pc)) mod 100) with
     | 1 -> begin
         let l = read_param state 1 in 
         let r = read_param state 2 in 
@@ -182,7 +184,7 @@ let run_trial_p2 mem init_inputs =
     in
     
     let%lwt outputs = _loop [] in
-    Lwt.return (List.max_elt ~compare:Int.compare outputs |> Option.value_exn)
+    Lwt.return (List.max_elt ~compare:Int.compare outputs |> Option.get)
   in
     
   (* Drive scheduler until top_level resolves *)
@@ -194,20 +196,20 @@ let bigarr_to_list arr = List.init (Bigarray.Array1.dim arr) ~f:(fun i -> arr.{i
 
 let run () =
   let input = Util.read_lines_to_string "d7_input.txt" in
-  let data = String.split input ~on:','
+  let data = String.split_on_char ',' input
              |> List.map ~f:int_of_string in
 
   (* Building this way because it looks like Permutation.to_list is busted *)
-  let p1_permutations = Combinat.Permutation.fold (Array.init num_machines ~f:ident)
+  let p1_permutations = Combinat.Permutation.fold (Array.init num_machines ~f:(fun i -> i))
     ~init:[] ~f:(fun acc new_perm -> (bigarr_to_list new_perm)::acc) in
   let p1 = List.map p1_permutations ~f:(fun perm -> run_trial_p1 data perm)
            |> List.max_elt ~compare:Int.compare
-           |> Option.value_exn in
+           |> Option.get in
   Printf.printf "Part 1: %d\n" p1;
 
   let p2_permutations = Combinat.Permutation.fold (Array.init num_machines ~f:(fun i -> i + 5))
     ~init:[] ~f:(fun acc new_perm -> (bigarr_to_list new_perm)::acc) in
   let p2 = List.map p2_permutations ~f:(fun perm -> run_trial_p2 data perm)
            |> List.max_elt ~compare:Int.compare
-           |> Option.value_exn in
+           |> Option.get in
   Printf.printf "Part 2: %d\n" p2;
