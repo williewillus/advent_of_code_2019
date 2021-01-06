@@ -1,4 +1,5 @@
 module Dir = Util.Dir
+module Hash_set = Base.Hash_set
 module Hashtbl = Base.Hashtbl
 module Point = Util.Point           
 
@@ -50,13 +51,9 @@ module RobotState = struct
          | _ -> failwith "Unknown turn command" in
        state.pos := Util.Dir.move !(state.pos) !(state.facing)
 
-  let dump state =
-    let f k =
-      let white = Hashtbl.find_exn state k = 1 in
-      if white then
-        Printf.printf "%d\t%d\n" k.Point.x k.Point.y
-    in
-    Hashtbl.iter_keys ~f state
+  let whites state =
+    Hashtbl.to_alist state
+    |> List.filter_map (fun (k, v) -> if v = 1 then Some k else None)
 end
                   
 let simulate data p2 =
@@ -69,13 +66,37 @@ let simulate data p2 =
   let () = Intcode.State.dispatch_all state in
   robot_state
 
+
 let run () =
   let input = Util.read_lines_to_string "d11_input.txt" in
   let data = String.split_on_char ',' input
              |> List.map int_of_string in
   let p1 = simulate data false in
   let () = Printf.printf "Part 1: %d\n" !(p1.painted) in
+
   let p2 = simulate data true in
-  let () = RobotState.dump p2.board in
-  Printf.printf "Part 2: Plot ^ with your choice of plotter (I'm lazy)\n"
+  let min_x_pos ps = List.fold_left (fun m v -> min m v.Point.x) Int.max_int ps in
+  let min_y_pos ps = List.fold_left (fun m v -> min m v.Point.y) Int.max_int ps in
+  let recenter poses =
+    let min_x = min_x_pos poses in
+    let min_y = min_y_pos poses in
+    List.map (fun p -> { Point.x = p.Point.x - min_x; y = p.Point.y - min_y}) poses
+  in
+  let whites = recenter (RobotState.whites p2.board) in
+  let min_x = min_x_pos whites in
+  let min_y = min_y_pos whites in
+  let max_x = List.fold_left (fun m v -> max m v.Point.x) Int.min_int whites in
+  let max_y = List.fold_left (fun m v -> max m v.Point.y) Int.min_int whites in
+  let set = Hash_set.of_list (module Point) whites in
+  let () = print_endline "Part 2:" in
+  for y = max_y downto min_y do
+    for x = min_x to max_x do
+      let p = { Point.x = x; y = y } in
+      if Hash_set.mem set p then
+        print_string "\u{2588}"
+      else
+        print_string "\u{2591}"
+    done;
+    print_newline ()
+  done
 
