@@ -1,25 +1,31 @@
+let days = [|
+    Some Day1.run; Some Day2.run; Some Day3.run; Some Day4.run; Some Day5.run;
+    Some Day6.run; Some Day7.run; Some Day8.run; Some Day9.run; Some Day10.run;
+    Some Day11.run; Some Day12.run; Some Day13.run; None; None;
+    Some Day16.run; None; None; None; None;
+    None; None; None; None; None;
+|]
+
 let main () =
   let d = Sys.argv.(1) in
   let start_time = Unix.gettimeofday () in
-  let () =
-    match (int_of_string d) with
-    | 1 -> Day1.run ()
-    | 2 -> Day2.run ()
-    | 3 -> Day3.run ()
-    | 4 -> Day4.run ()
-    | 5 -> Day5.run ()
-    | 6 -> Day6.run ()
-    | 7 -> Day7.run ()
-    | 8 -> Day8.run ()
-    | 9 -> Day9.run ()
-    | 10 -> Day10.run ()
-    | 11 -> Day11.run ()
-    | 12 -> Day12.run ()
-    | 13 -> Day13.run ()
-    | 16 -> Day16.run ()
-    | _ -> invalid_arg "Unknown day"
+  let () = 
+    if d = "all" then
+      let f i = function
+        | Some day ->
+           let () = Printf.printf "== Running day %d ==\n" (i + 1) in
+           day ()
+        | None -> ()
+      in
+      Array.iteri f days
+    else
+      let day = int_of_string d in
+      let () = Printf.printf "== Running day %d ==\n" day in
+      match days.(day - 1) with
+      | Some day -> day ()
+      | None -> raise (Invalid_argument "Invalid day")
   in
   let end_time = Unix.gettimeofday () in
-  Printf.printf "Completed in %f s\n" (end_time -. start_time)
+  Printf.eprintf "Completed in %f s\n" (end_time -. start_time)
 
 let () = main ()

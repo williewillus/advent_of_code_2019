@@ -1,4 +1,4 @@
-open Core
+open Base
 module Vec3 = Util.Vec3
 
 (* Given two lists of vec3's, sum corresponding vectors in each index *)
@@ -38,4 +38,4 @@ let run () =
   let (final_positions, final_vels) = Sequence.range 0 1000
                                       |> Sequence.fold ~init:(init_positions, init_vels) ~f:run_round in
   let p1 = energy final_positions final_vels in
-  Printf.printf "Part 1: %d\n" p1
+  Stdlib.Printf.printf "Part 1: %d\n" p1

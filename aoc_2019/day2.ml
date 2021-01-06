@@ -21,7 +21,7 @@ let run () =
       let r = simulate data i j in
       if r = 19690720 then begin
           Printf.printf "Part 2: %d\n" (100 * i + j);
-          exit 0
+          ()
       end
     done
   done
