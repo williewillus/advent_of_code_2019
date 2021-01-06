@@ -2,6 +2,7 @@ let run () =
   let input = Util.read_lines_to_string "d5_input.txt" in
   let data = String.split_on_char ',' input
              |> List.map int_of_string in
-  let () = print_string "For part 1, input '1'; for part 2, input '5';\n" in
-  let state = Intcode.State.init data in
-  Intcode.State.dispatch_all state
+  let state_p1 = Intcode.State.init data ~input_handler:(fun _ -> 1) in
+  let () = Intcode.State.dispatch_all state_p1 in
+  let state_p2 = Intcode.State.init data ~input_handler:(fun _ -> 5) in
+  Intcode.State.dispatch_all state_p2
