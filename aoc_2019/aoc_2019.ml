@@ -3,7 +3,7 @@ let days = [|
     Some Day6.run; Some Day7.run; Some Day8.run; Some Day9.run; None;
     Some Day11.run; Some Day12.run; Some Day13.run; None; None;
     Some Day16.run; Some Day17.run; None; Some Day19.run; None;
-    None; None; None; None; None;
+    None; None; None; Some Day24.run; None;
 |]
 
 let main () =
