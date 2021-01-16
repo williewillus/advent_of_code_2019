@@ -1,5 +1,4 @@
 module Hashtbl = Base.Hashtbl
-module Linked_queue = Base.Linked_queue
 module Point = Util.Point
 
 module Context = struct
@@ -22,13 +21,13 @@ module Context = struct
     {
       state : Intcode.State.t;
       board : (Point.t, obj) Hashtbl.t;
-      output_buffer : int Linked_queue.t;
+      output_buffer : int Queue.t;
     }
 
   let init data =
     let input_handler = fun _ -> failwith "Input unimplemented" in
-    let out_buf = Linked_queue.create () in
-    let output_handler = fun v -> Linked_queue.enqueue out_buf v in
+    let out_buf = Queue.create () in
+    let output_handler = fun v -> Queue.add v out_buf in
     {
       state = Intcode.State.init ~input_handler ~output_handler data;
       board = Hashtbl.create (module Point);
@@ -37,13 +36,13 @@ module Context = struct
 
   let run_to_output ctx =
     let res = Intcode.State.dispatch_until ctx.state
-                (fun () -> Linked_queue.length ctx.output_buffer = 3) in
+                (fun () -> Queue.length ctx.output_buffer = 3) in
     let () = match res with
       | Intcode.State.Terminated -> ()
       | Intcode.State.ConditionMet ->
-         let x = Linked_queue.dequeue_exn ctx.output_buffer in
-         let y = Linked_queue.dequeue_exn ctx.output_buffer in
-         let t = obj_of_int (Linked_queue.dequeue_exn ctx.output_buffer) in
+         let x = Queue.take ctx.output_buffer in
+         let y = Queue.take ctx.output_buffer in
+         let t = obj_of_int (Queue.take ctx.output_buffer) in
          Hashtbl.set ctx.board ~key:{Point.x = x; y} ~data:t
     in
     res
