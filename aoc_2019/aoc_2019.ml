@@ -3,8 +3,10 @@ let days = [|
     Some Day6.run; Some Day7.run; Some Day8.run; Some Day9.run; None;
     Some Day11.run; Some Day12.run; Some Day13.run; None; None;
     Some Day16.run; Some Day17.run; None; Some Day19.run; None;
-    None; None; None; Some Day24.run; None;
-|]
+    None; None; Some Day23.run; Some Day24.run; None;
+  |]
+
+let exclude_from_all = [| 23 |]
 
 let main () =
   let d = Sys.argv.(1) in
@@ -12,10 +14,10 @@ let main () =
   let () = 
     if d = "all" then
       let f i = function
-        | Some day ->
+        | Some day when not (Array.mem (i+1) exclude_from_all) ->
            let () = Printf.printf "== Running day %d ==\n" (i + 1) in
            day ()
-        | None -> ()
+        | _ -> ()
       in
       Array.iteri f days
     else

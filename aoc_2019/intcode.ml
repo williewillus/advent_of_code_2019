@@ -57,7 +57,7 @@ module State = struct
     | _ -> invalid_arg "Unknown parameter mode"
 
   let dispatch state =
-    match (get state !(state.pc) mod 100) with
+    match ((get state !(state.pc)) mod 100) with
     | 1 -> begin
         let l = read_param state 1 in 
         let r = read_param state 2 in 
@@ -116,7 +116,7 @@ module State = struct
        state.pc := !(state.pc) + 2;
        false
     | 99 -> true
-    | _ as i -> invalid_arg ("Unknown opcode" ^ (string_of_int i))
+    | _ as i -> invalid_arg ("Unknown opcode " ^ (string_of_int i) ^ " @ " ^ (string_of_int !(state.pc)))
 
   type dispatch_result =
     | Terminated
