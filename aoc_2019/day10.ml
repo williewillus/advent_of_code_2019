@@ -21,16 +21,13 @@ let asteroids_visible_from grid sx sy =
   let seen = ref [] in
   for y = 0 to height - 1 do
     for x = 0 to width - 1 do
-      if (y <> sy) && (x <> sx) && grid.(y).(x) = '#' then
+      if not ((y = sy) && (x = sx)) && grid.(y).(x) = '#' then
         let delta = {x = float_of_int (x - sx); y = float_of_int (y - sy)}
                     |> normalize in
         if not (Base.List.mem !seen delta ~equal:eps_eq) then
           seen := delta::!seen
     done
   done;
-  Printf.printf "Seen directions from %d, %d: " sx sy;
-  List.iter (fun v -> Printf.printf "[%.4f, %.4f]" v.x v.y) !seen;
-  print_newline ();
   List.length !seen
 
 let run () =
@@ -47,7 +44,6 @@ let run () =
     for x = 0 to width - 1 do
       if grid.(y).(x) = '#' then
         let visible = asteroids_visible_from grid x y in
-        let () = Printf.printf "%d, %d can see %d\n" x y visible in
         if visible > !max_seen then
           begin
             max_seen := visible;

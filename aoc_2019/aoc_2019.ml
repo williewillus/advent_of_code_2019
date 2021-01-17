@@ -6,7 +6,7 @@ let days = [|
     None; None; Some Day23.run; Some Day24.run; None;
   |]
 
-let exclude_from_all = [| 10; 23 |]
+let exclude_from_all = [| 23 |]
 
 let main () =
   let d = Sys.argv.(1) in
